@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Shalat Tracker</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      --bg: #09090b;
+      --card: #18181b;
+      --card-2: #27272a;
+      --primary: #2dd4bf;
+      --primary-dim: rgba(45, 212, 191, 0.15);
+      --success: #34d399;
+      --success-bg: rgba(52, 211, 153, 0.12);
+      --danger: #f87171;
+      --danger-bg: rgba(248, 113, 113, 0.12);
+      --warning: #fbbf24;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --border: #27272a;
+      --radius: 16px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      padding: 12px 14px 40px;
+      line-height: 1.4;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      text-align: center;
+      margin-bottom: 14px;
+      padding-top: 4px;
+    }
+
+    .header h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text);
+    }
+
+    .header .subtitle {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+      font-weight: 400;
+    }
+
+    .header .meta {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 6px;
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+    }
+
+    .header .meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* ===== NEXT PRAYER ===== */
+    .next-card {
+      background: linear-gradient(135deg, #134e4a 0%, #0f766e 100%);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .next-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 180px;
+      height: 180px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 50%;
+    }
+
+    .next-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .next-name {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: white;
+      margin: 2px 0 1px;
+      letter-spacing: -0.02em;
+    }
+
+    .next-time {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.9);
+    }
+
+    /* ===== STATS ROW ===== */
+    .stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .stat-label {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .stat-value {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-top: 2px;
+      letter-spacing: -0.02em;
+    }
+
+    .stat-value.green { color: var(--success); }
+    .stat-value.teal { color: var(--primary); }
+
+    .progress-mini {
+      height: 4px;
+      background: var(--card-2);
+      border-radius: 10px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    .progress-mini-fill {
+      height: 100%;
+      background: var(--success);
+      border-radius: 10px;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    /* ===== SECTION TITLE ===== */
+    .section-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+      padding-left: 2px;
+    }
+
+    /* ===== WEEK GRID ===== */
+    .week-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+    }
+
+    .week-day {
+      text-align: center;
+    }
+
+    .week-day .label {
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+
+    .week-box {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 600;
+      background: var(--card-2);
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+
+    .week-box.full { background: #059669; color: white; }
+    .week-box.high { background: #047857; color: #a7f3d0; }
+    .week-box.mid  { background: #a16207; color: #fef08a; }
+    .week-box.low  { background: #991b1b; color: #fecaca; }
+    .week-box.empty { background: transparent; border: 1px dashed #3f3f46; color: #52525b; }
+
+    /* ===== PRAYER LIST ===== */
+    .prayer-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 2px 10px;
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .prayer-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 2px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .prayer-item:last-child { border-bottom: none; }
+
+    .prayer-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .prayer-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: var(--primary-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+    }
+
+    .prayer-info .name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .prayer-info .time {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      border: none;
+      border-radius: 9px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      padding: 7px 14px;
+      min-width: 76px;
+    }
+
+    .btn-shalat {
+      background: var(--primary);
+      color: #042f2e;
+    }
+
+    .btn-shalat:active { transform: scale(0.96); opacity: 0.9; }
+
+    .btn-shalat.done {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+    }
+
+    .btn-full {
+      width: 100%;
+      padding: 11px;
+      font-size: 0.85rem;
+      border-radius: 10px;
+    }
+
+    .btn-primary {
+      background: var(--text);
+      color: var(--bg);
+    }
+
+    .btn-primary:active { opacity: 0.9; }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:active {
+      background: var(--card-2);
+      color: var(--text);
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 14px;
+      font-size: 0.68rem;
+      color: #52525b;
+    }
+
+    /* Menu Overlay */
+    .menu-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 100;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .menu-sheet {
+      background: var(--card);
+      width: 100%;
+      max-width: 400px;
+      border-radius: 20px 20px 0 0;
+      padding: 12px 16px 28px;
+      animation: slideUp 0.25s ease;
+    }
+
+    .menu-handle {
+      width: 36px;
+      height: 4px;
+      background: #3f3f46;
+      border-radius: 10px;
+      margin: 0 auto 14px;
+    }
+
+    .menu-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 500;
+      padding: 13px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .menu-item:active {
+      background: var(--card-2);
+    }
+
+    .menu-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--card-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    .menu-close {
+      margin-top: 6px;
+      color: var(--text-muted);
+      justify-content: center;
+      border-top: 1px solid var(--border);
+      border-radius: 0;
+      padding-top: 16px;
+      font-size: 0.9rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    /* ===== REPORT PAGE ===== */
+    .hidden { display: none !important; }
+
+    .report-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .report-header h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .report-header .date {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .report-hero {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .circular-progress {
+      position: relative;
+      width: 110px;
+      height: 110px;
+      margin: 0 auto 12px;
+    }
+
+    .circular-progress svg { transform: rotate(-90deg); }
+    .circular-progress circle { fill: none; stroke-width: 7; }
+    .circular-bg { stroke: var(--card-2); }
+    .circular-fill {
+      stroke: var(--success);
+      stroke-linecap: round;
+      stroke-dasharray: 283;
+      stroke-dashoffset: 283;
+      transition: stroke-dashoffset 0.6s ease;
+    }
+
+    .circular-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .circular-text .percent {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--success);
+      line-height: 1;
+    }
+
+    .circular-text .label {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .report-summary {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .report-summary strong { color: var(--text); }
+
+    .report-list-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 8px 14px;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .report-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .report-row:last-child { border-bottom: none; }
+
+    .report-row-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 500;
+    }
+
+    .report-row .icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background: var(--primary-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+    }
+
+    .status-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .status-sudah {
+      background: var(--success-bg);
+      color: var(--success);
+    }
+
+    .status-belum {
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+
+    .history-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .history-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 10px;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.88rem;
+    }
+
+    .history-item:last-child { border-bottom: none; }
+    .history-date { color: var(--text-muted); }
+    .history-count { font-weight: 600; }
+
+    .loading {
+      text-align: center;
+      padding: 28px;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+
+    /* Doa Page */
+    .doa-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .doa-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+
+    .doa-arabic {
+      font-size: 1.25rem;
+      line-height: 1.9;
+      text-align: right;
+      direction: rtl;
+      color: var(--text);
+      margin-bottom: 10px;
+      font-family: 'Amiri', 'Scheherazade New', 'Traditional Arabic', serif;
+    }
+
+    .doa-latin {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+
+    .doa-arti {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- ===== MAIN ===== -->
+    <div id="mainPage">
+      <div class="header">
+        <h1>Shalat Tracker</h1>
+        <div class="subtitle">Ibadah lebih teratur</div>
+        <div class="meta">
+          <span id="todayDate">—</span>
+          <span id="locationText">📍 —</span>
+        </div>
+      </div>
+
+      <!-- Next Prayer -->
+      <div class="next-card">
+        <div class="next-label">Berikutnya</div>
+        <div class="next-name" id="nextPrayerName">—</div>
+        <div class="next-time" id="nextPrayerTime">—</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Hari Ini</div>
+          <div class="stat-value green"><span id="streakToday">0</span>/5</div>
+          <div class="progress-mini">
+            <div class="progress-mini-fill" id="progress"></div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Streak</div>
+          <div class="stat-value teal" id="streakDays">0 hari</div>
+        </div>
+      </div>
+
+      <!-- Weekly -->
+      <div class="section-title">7 Hari Terakhir</div>
+      <div class="week-card">
+        <div class="week-grid" id="weekGrid"></div>
+      </div>
+
+      <!-- Prayer List -->
+      <div class="section-title">Checklist Hari Ini</div>
+      <div class="prayer-card" id="prayerListCard">
+        <div class="loading" id="prayerLoading">Memuat waktu shalat...</div>
+      </div>
+
+      <button class="btn btn-full btn-primary" onclick="toggleMenu()" id="menuBtn">Menu</button>
+
+      <p class="footer">Data tersimpan di perangkat • Shalat Tracker</p>
+    </div>
+
+    <!-- MENU OVERLAY -->
+    <div id="menuOverlay" class="menu-overlay hidden" onclick="if(event.target===this)closeMenu()">
+      <div class="menu-sheet">
+        <div class="menu-handle"></div>
+        <div class="menu-title">Menu</div>
+
+        <button class="menu-item" onclick="showReport(); closeMenu();">
+          <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></span>
+          Laporan
+        </button>
+
+        <button class="menu-item" onclick="showDoa(); closeMenu();">
+          <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a5 5 0 0 1 5 5v3a5 5 0 0 1-10 0V7a5 5 0 0 1 5-5z"/><path d="M12 15v7"/><path d="M8 22h8"/></svg></span>
+          Doa Setelah Shalat
+        </button>
+
+        <button class="menu-item" onclick="requestLocation(); closeMenu();">
+          <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span>
+          Ganti Lokasi
+        </button>
+
+        <button class="menu-item" onclick="resetToday(); closeMenu();">
+          <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></span>
+          Reset Hari Ini
+        </button>
+
+        <button class="menu-item menu-close" onclick="closeMenu()">Tutup</button>
+      </div>
+    </div>
+
+    <!-- ===== REPORT ===== -->
+    <div id="reportPage" class="hidden">
+      <div class="report-header">
+        <h1>Laporan</h1>
+        <div class="date" id="reportDate">—</div>
+      </div>
+
+      <div class="report-hero">
+        <div class="circular-progress">
+          <svg width="110" height="110">
+            <circle class="circular-bg" cx="55" cy="55" r="45"></circle>
+            <circle class="circular-fill" id="circleFill" cx="55" cy="55" r="45"></circle>
+          </svg>
+          <div class="circular-text">
+            <div class="percent" id="reportPercent">0%</div>
+            <div class="label">Lengkap</div>
+          </div>
+        </div>
+        <div class="report-summary"><strong id="reportCount">0</strong> dari 5 waktu</div>
+        <div style="margin-top:8px;font-size:0.88rem;color:var(--primary);font-weight:600;" id="reportStreak">0 hari streak</div>
+      </div>
+
+      <div class="report-list-card" id="reportList"></div>
+
+      <div class="history-card">
+        <div class="history-title">Riwayat 7 Hari</div>
+        <div id="historyList"></div>
+      </div>
+
+      <button class="btn btn-full btn-primary" onclick="showMain()">Kembali</button>
+    </div>
+
+    <!-- ===== DOA PAGE ===== -->
+    <div id="doaPage" class="hidden">
+      <div class="report-header">
+        <h1>Doa Setelah Shalat</h1>
+        <div class="date">Bacaan yang dianjurkan</div>
+      </div>
+
+      <div class="doa-card">
+        <div class="doa-title">1. Istighfar (3x)</div>
+        <div class="doa-arabic">أَسْتَغْفِرُ اللهَ</div>
+        <div class="doa-latin">Astaghfirullāh (3 kali)</div>
+        <div class="doa-arti">Aku memohon ampun kepada Allah.</div>
+      </div>
+
+      <div class="doa-card">
+        <div class="doa-title">2. Doa Salam</div>
+        <div class="doa-arabic">اللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ</div>
+        <div class="doa-latin">Allāhumma antas-salām wa minkas-salām tabārakta yā dzal-jalāli wal-ikrām</div>
+        <div class="doa-arti">Ya Allah, Engkau adalah Maha Sejahtera, dan dari-Mu kesejahteraan. Maha Suci Engkau, wahai Tuhan Pemilik keagungan dan kemuliaan.</div>
+      </div>
+
+      <div class="doa-card">
+        <div class="doa-title">3. Doa Mohon Keselamatan Agama</div>
+        <div class="doa-arabic">اللَّهُمَّ إِنَّا نَسْأَلُكَ سَلَامَةً فِي الدِّينِ، وَعَافِيَةً فِي الْجَسَدِ، وَزِيَادَةً فِي الْعِلْمِ، وَبَرَكَةً فِي الرِّزْقِ، وَتَوْبَةً قَبْلَ الْمَوْتِ، وَرَحْمَةً عِنْدَ الْمَوْتِ، وَمَغْفِرَةً بَعْدَ الْمَوْتِ</div>
+        <div class="doa-latin">Allāhumma innā nas’aluka salāmatan fid-dīn, wa ‘āfiyatan fil-jasad, wa ziyādatan fil-‘ilm, wa barakatan fir-rizq, wa taubatan qablal-maut, wa rahmatan ‘indal-maut, wa maghfiratan ba’dal-maut</div>
+        <div class="doa-arti">Ya Allah, sesungguhnya kami memohon kepada-Mu keselamatan dalam agama, kesehatan pada tubuh, tambahan ilmu, keberkahan rezeki, taubat sebelum mati, rahmat saat mati, dan ampunan setelah mati.</div>
+      </div>
+
+      <div class="doa-card">
+        <div class="doa-title">4. Doa Perlindungan</div>
+        <div class="doa-arabic">اللَّهُمَّ أَعِنِّي عَلَى ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ</div>
+        <div class="doa-latin">Allāhumma a‘innī ‘alā dzikrika wa syukrika wa husni ‘ibādatik</div>
+        <div class="doa-arti">Ya Allah, bantulah aku untuk selalu mengingat-Mu, bersyukur kepada-Mu, dan memperbaiki ibadah kepada-Mu.</div>
+      </div>
+
+      <div class="doa-card">
+        <div class="doa-title">5. Ayat Kursi (disarankan)</div>
+        <div class="doa-arabic">اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ ...</div>
+        <div class="doa-latin">Allāhu lā ilāha illā huwal-ḥayyul-qayyūm...</div>
+        <div class="doa-arti">Allah, tidak ada tuhan selain Dia Yang Maha Hidup, Yang terus-menerus mengurus (makhluk-Nya)...</div>
+      </div>
+
+      <button class="btn btn-full btn-primary" onclick="showMain()" style="margin-top:8px;">Kembali</button>
+    </div>
+
+  </div>
+
+  <script>
+    const PRAYERS = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+    const PRAYER_MAP = {
+      Fajr:    { id: 'subuh',   name: 'Subuh',   icon: 'subuh' },
+      Dhuhr:   { id: 'dzuhur',  name: 'Dzuhur',  icon: 'dzuhur' },
+      Asr:     { id: 'ashar',   name: 'Ashar',   icon: 'ashar' },
+      Maghrib: { id: 'maghrib', name: 'Maghrib', icon: 'maghrib' },
+      Isha:    { id: 'isya',    name: 'Isya',    icon: 'isya' }
+    };
+
+    // Clean SVG icons
+    const ICONS = {
+      subuh: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="m6.8 15.3 1.5-1.5"/><path d="M2 12h4"/><path d="m17.2 15.3-1.5-1.5"/><path d="M22 12h-4"/><path d="M12 22v-8"/><path d="M8 18h8"/></svg>`,
+      dzuhur: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`,
+      ashar: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/><path d="M16 12h.01"/></svg>`,
+      maghrib: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10V2"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="M16 6 12 2 8 6"/><path d="M16 18a4 4 0 0 0-8 0"/></svg>`,
+      isya: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>`
+    };
+
+    let prayerTimes = {};
+    let currentLat = -6.2088;
+    let currentLon = 106.8456;
+
+    function getStorage() {
+      return JSON.parse(localStorage.getItem('shalatTracker') || '{}');
+    }
+    function saveStorage(data) {
+      localStorage.setItem('shalatTracker', JSON.stringify(data));
+    }
+    function getTodayKey() {
+      const d = new Date();
+      return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    }
+    function getTodayData() {
+      const storage = getStorage();
+      const key = getTodayKey();
+      if (!storage[key]) {
+        storage[key] = { completed: {} };
+        saveStorage(storage);
+      }
+      return storage[key];
+    }
+    function saveTodayData(data) {
+      const storage = getStorage();
+      storage[getTodayKey()] = data;
+      saveStorage(storage);
+    }
+    function countCompleted(dayData) {
+      if (!dayData || !dayData.completed) return 0;
+      return Object.values(PRAYER_MAP).filter(p => dayData.completed[p.id]).length;
+    }
+
+    function calculateStreak() {
+      const storage = getStorage();
+      let streak = 0;
+      let d = new Date();
+      const todayCount = countCompleted(storage[getTodayKey()]);
+      if (todayCount < 5) d.setDate(d.getDate() - 1);
+
+      for (let i = 0; i < 60; i++) {
+        const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        if (countCompleted(storage[key]) === 5) {
+          streak++;
+          d.setDate(d.getDate() - 1);
+        } else break;
+      }
+      return streak;
+    }
+
+    function getLast7Days() {
+      const storage = getStorage();
+      const result = [];
+      const d = new Date();
+      for (let i = 6; i >= 0; i--) {
+        const temp = new Date(d);
+        temp.setDate(d.getDate() - i);
+        const key = temp.getFullYear() + '-' + String(temp.getMonth()+1).padStart(2,'0') + '-' + String(temp.getDate()).padStart(2,'0');
+        result.push({
+          key, date: temp,
+          dayName: temp.toLocaleDateString('id-ID', { weekday: 'short' }),
+          count: countCompleted(storage[key]),
+          isToday: i === 0
+        });
+      }
+      return result;
+    }
+
+    async function fetchPrayerTimes(lat, lon) {
+      try {
+        const today = new Date();
+        const dateStr = today.getDate() + '-' + (today.getMonth()+1) + '-' + today.getFullYear();
+        const url = `https://api.aladhan.com/v1/timings/${dateStr}?latitude=${lat}&longitude=${lon}&method=20`;
+        const res = await fetch(url);
+        const json = await res.json();
+        if (json.code === 200) {
+          prayerTimes = json.data.timings;
+          return true;
+        }
+      } catch (e) {}
+      prayerTimes = { Fajr: '04:45', Dhuhr: '12:05', Asr: '15:25', Maghrib: '18:10', Isha: '19:25' };
+      return false;
+    }
+
+    function renderPrayerList() {
+      const card = document.getElementById('prayerListCard');
+      const loading = document.getElementById('prayerLoading');
+      if (loading) loading.remove();
+      card.querySelectorAll('.prayer-item').forEach(el => el.remove());
+
+      PRAYERS.forEach(key => {
+        const info = PRAYER_MAP[key];
+        const time = (prayerTimes[key] || '--:--').substring(0, 5);
+        const div = document.createElement('div');
+        div.className = 'prayer-item';
+        div.dataset.id = info.id;
+        div.innerHTML = `
+          <div class="prayer-left">
+            <div class="prayer-icon">${ICONS[info.icon]}</div>
+            <div class="prayer-info">
+              <div class="name">${info.name}</div>
+              <div class="time">${time}</div>
+            </div>
+          </div>
+          <button class="btn btn-shalat" onclick="togglePrayer(this)">Shalat</button>
+        `;
+        card.appendChild(div);
+      });
+
+      updateNextPrayer();
+      updateUI();
+    }
+
+    function updateNextPrayer() {
+      const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      let nextName = '', nextTime = '';
+
+      for (const key of PRAYERS) {
+        const t = (prayerTimes[key] || '00:00').substring(0, 5);
+        const [h, m] = t.split(':').map(Number);
+        if (h * 60 + m > currentMinutes) {
+          nextName = PRAYER_MAP[key].name;
+          nextTime = t;
+          break;
+        }
+      }
+      if (!nextName) {
+        nextName = 'Subuh';
+        nextTime = (prayerTimes.Fajr || '04:45').substring(0, 5) + ' · besok';
+      }
+
+      document.getElementById('nextPrayerName').textContent = nextName;
+      document.getElementById('nextPrayerTime').textContent = nextTime;
+    }
+
+    function requestLocation() {
+      document.getElementById('locationText').textContent = '📍 ...';
+      if (!navigator.geolocation) return useDefaultLocation();
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          currentLat = pos.coords.latitude;
+          currentLon = pos.coords.longitude;
+          document.getElementById('locationText').textContent = `📍 ${currentLat.toFixed(1)}, ${currentLon.toFixed(1)}`;
+          await fetchPrayerTimes(currentLat, currentLon);
+          renderPrayerList();
+        },
+        () => useDefaultLocation(),
+        { timeout: 8000 }
+      );
+    }
+
+    async function useDefaultLocation() {
+      currentLat = -6.2088;
+      currentLon = 106.8456;
+      document.getElementById('locationText').textContent = '📍 Jakarta';
+      await fetchPrayerTimes(currentLat, currentLon);
+      renderPrayerList();
+    }
+
+    function updateUI() {
+      const todayData = getTodayData();
+      let count = 0;
+
+      document.querySelectorAll('.prayer-item').forEach(item => {
+        const id = item.dataset.id;
+        const btn = item.querySelector('.btn-shalat');
+        if (!btn) return;
+        const isDone = !!todayData.completed[id];
+        if (isDone) {
+          btn.classList.add('done');
+          btn.textContent = 'Selesai';
+          count++;
+        } else {
+          btn.classList.remove('done');
+          btn.textContent = 'Shalat';
+        }
+      });
+
+      document.getElementById('streakToday').textContent = count;
+      document.getElementById('progress').style.width = (count / 5 * 100) + '%';
+
+      const streak = calculateStreak();
+      document.getElementById('streakDays').textContent = streak + ' hari';
+
+      renderWeekGrid();
+    }
+
+    function renderWeekGrid() {
+      const days = getLast7Days();
+      const grid = document.getElementById('weekGrid');
+      grid.innerHTML = '';
+      days.forEach(day => {
+        let cls = 'empty';
+        if (day.count === 5) cls = 'full';
+        else if (day.count === 4) cls = 'high';
+        else if (day.count >= 2) cls = 'mid';
+        else if (day.count >= 0 && (day.key in getStorage() || day.isToday)) cls = 'low';
+
+        const div = document.createElement('div');
+        div.className = 'week-day';
+        div.innerHTML = `<div class="label">${day.dayName}</div><div class="week-box ${cls}">${day.count > 0 || day.isToday ? day.count : ''}</div>`;
+        grid.appendChild(div);
+      });
+    }
+
+    function togglePrayer(btn) {
+      const item = btn.closest('.prayer-item');
+      const id = item.dataset.id;
+      const todayData = getTodayData();
+      todayData.completed[id] = !todayData.completed[id];
+      saveTodayData(todayData);
+      updateUI();
+    }
+
+    function resetToday() {
+      if (confirm('Reset semua shalat hari ini?')) {
+        saveTodayData({ completed: {} });
+        updateUI();
+      }
+    }
+
+    function showReport() {
+      const todayData = getTodayData();
+      let count = 0;
+      const list = document.getElementById('reportList');
+      list.innerHTML = '';
+
+      Object.values(PRAYER_MAP).forEach(info => {
+        const isDone = !!todayData.completed[info.id];
+        if (isDone) count++;
+        const row = document.createElement('div');
+        row.className = 'report-row';
+        row.innerHTML = `
+          <div class="report-row-left">
+            <div class="icon">${ICONS[info.icon]}</div>
+            <span>${info.name}</span>
+          </div>
+          <span class="status-badge ${isDone ? 'status-sudah' : 'status-belum'}">
+            ${isDone ? 'Selesai' : 'Belum'}
+          </span>
+        `;
+        list.appendChild(row);
+      });
+
+      const percent = Math.round((count / 5) * 100);
+      document.getElementById('reportPercent').textContent = percent + '%';
+      document.getElementById('reportCount').textContent = count;
+      document.getElementById('circleFill').style.strokeDashoffset = 283 - (283 * percent / 100);
+
+      const streak = calculateStreak();
+      document.getElementById('reportStreak').textContent = streak + ' hari streak';
+
+      document.getElementById('reportDate').textContent = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+      const historyList = document.getElementById('historyList');
+      historyList.innerHTML = '';
+      getLast7Days().reverse().forEach(day => {
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        const label = day.isToday ? 'Hari ini' : day.date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+        item.innerHTML = `
+          <span class="history-date">${label}</span>
+          <span class="history-count" style="color:${day.count === 5 ? 'var(--success)' : day.count >= 3 ? 'var(--warning)' : 'var(--danger)'}">${day.count}/5</span>
+        `;
+        historyList.appendChild(item);
+      });
+
+      document.getElementById('mainPage').classList.add('hidden');
+      document.getElementById('doaPage').classList.add('hidden');
+      document.getElementById('reportPage').classList.remove('hidden');
+    }
+
+    function showMain() {
+      document.getElementById('reportPage').classList.add('hidden');
+      document.getElementById('doaPage').classList.add('hidden');
+      document.getElementById('mainPage').classList.remove('hidden');
+      updateUI();
+    }
+
+    function showDoa() {
+      document.getElementById('mainPage').classList.add('hidden');
+      document.getElementById('reportPage').classList.add('hidden');
+      document.getElementById('doaPage').classList.remove('hidden');
+    }
+
+    function toggleMenu() {
+      document.getElementById('menuOverlay').classList.remove('hidden');
+    }
+
+    function closeMenu() {
+      document.getElementById('menuOverlay').classList.add('hidden');
+    }
+
+    // Init
+    document.getElementById('todayDate').textContent = new Date().toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' });
+    requestLocation();
+  </script>
+</body>
+</html>
